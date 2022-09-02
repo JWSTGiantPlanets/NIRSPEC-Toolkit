@@ -113,7 +113,7 @@ class JWSTSolarSystemPointing:
         lat : degrees
             Planetocsentric latitude
         lon : degrees
-            East Longitude (should probs be west) 
+            West Longitude 
         distance_limb : km
             The distance between the pixel and the 1 bar limb. The 1 bar limb is defined as 0 km, 
             and negative distances are on the limb on the planet, positive ones are above the limb.
@@ -122,7 +122,7 @@ class JWSTSolarSystemPointing:
         lat_limb : degrees
             Planetocentric latitude of the point on the limb closest to the pixel look vector.
         lon_limb : degrees
-            East longitude of the point on the limb closest to the pixel look vector.
+            West longitude of the point on the limb closest to the pixel look vector.
         lat_graphic : degrees
             Planetgraphic latitude.
         phase : degrees
@@ -134,11 +134,11 @@ class JWSTSolarSystemPointing:
         azimuth : degrees
             Azimuth angle
         localtime : decimal hours
-            The localtime of a point
+            The localtime of a pixel
         distance_rings : km
             The distance from the centre of the planet in the equatorial (ring) plane
         lon_rings : degrees
-            The East longitude of the the point on the equatorial (ring) plane
+            The West longitude of the the point on the equatorial (ring) plane
         ra : degrees
             Right Acension 
         dec : degrees
