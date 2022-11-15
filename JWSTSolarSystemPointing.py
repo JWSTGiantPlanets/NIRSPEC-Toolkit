@@ -71,7 +71,7 @@ class JWSTSolarSystemPointing:
         # https://jwst-pipeline.readthedocs.io/en/latest/jwst/datamodels/index.html
 
         # Define the output names and what are angles
-        self.keys   = ['lat', 'lon', 'lat_limb', 'lon_limb', 'lat_graphic', 'phase', 'emission', 'incidence', 'azimuth', 'localtime', 'distance_limb', 'distance_rings', 'lon_rings', 'ra', 'dec']
+        self.keys   = ['lat', 'lon', 'lat_limb', 'lon_limb', 'lat_graphic', 'phase', 'emission', 'incidence', 'azimuth', 'localtime', 'distance_limb', 'distance_rings', 'lon_rings', 'ra', 'dec', 'radial_velocity', 'doppler']
         self.angles = ['lat', 'lon', 'lat_limb', 'lon_limb', 'lat_graphic', 'phase', 'emission', 'incidence', 'azimuth', 'lon_rings']
 
         # Create a reciprocal map to the keys
@@ -143,7 +143,13 @@ class JWSTSolarSystemPointing:
             Right Acension 
         dec : degrees
             Declination
-
+        radial_velocity : km/s
+            Radial velocity of the surface point relative to the observer. Positive
+            values correspond to motion awaty from the observer.
+        doppler : dimensionless
+            Doppler factor calculated from radial velocity. Calculated as
+            sqrt((1 + v/c)/(1 - v/c)) where v is radial velocity away from the observer
+            and c is the speed of light.
         '''
         # Set up the return variable
         ret = {}
@@ -212,6 +218,28 @@ class JWSTSolarSystemPointing:
             # Get the localtime, and convert to decimal hours 
             hr, min, sc, time, ampm = spice.et2lst(self.et, self.id_target, ret['lon'], 'PLANETOCENTRIC')
             ret['localtime'] = hr + min / 60.0 + sc / 3600.0
+
+            # Get the radial velocity for doppler shift calculation
+            state, lt = spice.spkcpt(
+                trgpos=point,
+                trgctr=self.target,
+                trgref=self.framestring,
+                et=self.et,
+                outref=self.iref,
+                refloc='OBSERVER',
+                abcorr=self.abcorr,
+                obsrvr=self.observatory,
+            )
+            position = state[:3]
+            velocity = state[3:]
+            # dot the velocity with the normalised position vector to get radial component
+            radial_velocity = np.dot(position, velocity) / np.linalg.norm(position)
+            # calculate doppler shift factor from radial velocity
+            beta = radial_velocity / spice.clight()
+            doppler = np.sqrt((1 + beta) / (1 - beta))
+            ret['radial_velocity'] = radial_velocity
+            ret['doppler'] = doppler
+
 
         # For the angles, convert radians to degrees
         for key in self.angles : 
