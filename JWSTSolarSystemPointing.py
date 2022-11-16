@@ -287,8 +287,8 @@ class JWSTSolarSystemPointing:
                     output[i, x, y] = ret[key]
 
         # Add RA and Dec
-        output[-2, : :] = self.ras
-        output[-1, : :] = self.decs
+        output[self.keys.index('ra'), : :] = self.ras
+        output[self.keys.index('dec'), : :] = self.decs
 
         self.geometry_cube = output
         return output
